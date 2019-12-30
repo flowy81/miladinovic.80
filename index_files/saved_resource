@@ -1,0 +1,8 @@
+if(typeof __webconsult_params == 'undefined') __webconsult_params = {};
+__webconsult_params.site_hash = 'lxTrLQybjokd';
+
+var head= document.getElementsByTagName('head')[0];
+var script= document.createElement('script');
+script.type= 'text/javascript';
+script.src= 'https://widget.consultsystems.ru/widget.js?7daa1368';
+head.appendChild(script);

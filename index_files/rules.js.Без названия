@@ -1,0 +1,254 @@
+jQuery( document ).ready(function(){
+
+	jQuery( 'a.fancy' ).fancybox({ padding:15 });
+	jQuery( '#online-order' ).fancybox({
+        padding:15,
+        type:'iframe',
+        width:450,
+        height:530,
+        autoSize:false,
+        fitToView:false
+	});
+	//jQuery( '#online-order' ).fancybox({ padding:15, type: 'ajax', afterClose:function(){ var callBack = jQuery( '#online-order-popup' );callBack.find( 'div' ).html( '' );callBack.find( 'form' ).show().get( 0 ).reset();callBack.find( 'div' ).hide(); } });
+	jQuery( '.online-order' ).fancybox({
+        padding:15,
+        type:'iframe',
+        width:450,
+        height:530,
+        autoSize:false,
+        fitToView:false
+    });
+	jQuery( '#online-calc' ).fancybox({
+		padding:15, 
+		type:'iframe',
+		width:450,
+		fitToView:true
+	});
+    jQuery( '.onlinecalc' ).fancybox({
+        padding:15,
+        width:450,
+        type:'iframe',
+        fitToView:true
+    });
+	jQuery( '#callback-link' ).fancybox({ 
+		padding:15,
+		type:'iframe',
+		width:350,
+		height:360,
+		autoSize:false,
+		fitToView:false
+	});
+	//jQuery( '#callback-link' ).fancybox({ padding:15, afterClose:function(){ var callBack = jQuery( '#callback' );callBack.find( 'div' ).html( '' );callBack.find( 'form' ).show().get( 0 ).reset();callBack.find( 'div' ).hide(); } });
+
+	jQuery( '#scrollup' ).find( 'img' ).click( function(){
+		jQuery( 'html,body' ).animate({ scrollTop:0 }, 500 );
+		return false;
+	});
+
+	jQuery( window ).scroll( function(){
+		if ( jQuery( document ).scrollTop() > 450 ) {
+			jQuery( '#scrollup' ).fadeIn( 'slow' );
+		} else {
+			jQuery( '#scrollup' ).fadeOut( 'slow' );
+		}
+	});
+
+	if(0!=jQuery("table.items").length){
+		jQuery("table.items").wrap( '<div class="overtable"></div>' );
+	}
+
+		//jQuery( '#menu' ).find( 'a[href="' + window.location.pathname + '"]' ).parents( 'ul' ).siblings( 'ul' ).hide();
+		//jQuery( '#menu h3' ).click(function(){
+		//	jQuery( this ).next( 'ul' ).slideDown( 'fast' ).siblings( 'ul:visible' ).slideUp( 'fast' );
+		//	jQuery( this ).addClass( 'active' );
+		//	jQuery( this ).siblings( 'h3' ).removeClass( 'active' );
+		//});
+		//	jQuery( '#menu' ).find( 'a[href="' + window.location.pathname + '"]' ).parents( 'h3' ).click();
+
+	jQuery( '#menu-button' ).click(function(){
+		jQuery( 'nav#menu-top' ).toggleClass( 'vis' );
+		jQuery( 'nav#menu' ).toggleClass( 'vis' );
+		jQuery( this ).toggleClass( 'menu-open' );
+	});
+
+	jQuery( '#callback' ).find( 'form' ).on( 'submit', function(){
+		var fields = [ 'ordphone' ];
+		for ( var f in fields ) {
+			if ( fields.hasOwnProperty( f ) ) {
+				var me = jQuery( '#' + fields[f] );
+				if ( '' == me.val() ) {
+					me.blink().focus();
+					return false;
+				}
+			}
+		}
+		jQuery.ajax({
+			url: '/callback/',
+			cache: false,
+			data: 'ajax=1&' + jQuery( this ).serialize(),
+			dataType: 'json',
+			type: 'post',
+			error:function(){},
+			success:function( d ){
+				if ( 'success' == d.result ) {
+					var callBack = jQuery( '#callback' );
+					callBack.find( 'div' ).html( d.message );
+					callBack.find( 'form' ).hide();
+					callBack.find( 'div' ).show();
+					return false;
+				}
+			}
+		});
+		return false;
+	});
+
+	jQuery( '.online-order-popup' ).find( 'form' ).on( 'submit', function(){
+		var meDiv = jQuery( this ).closest( 'div' ).attr( 'id' ), controlSuffix = '';
+		if ( 'online-order-popup' != meDiv ) controlSuffix = meDiv.substr( 18 );
+		var fields = [ 'ooname' + controlSuffix, 'oophone' + controlSuffix, 'oocontent' + controlSuffix ];
+		for ( var f in fields ) {
+			if ( fields.hasOwnProperty( f ) ) {
+				var me = jQuery( '#' + fields[f] );
+				if ( '' == me.val() ) {
+					me.blink().focus();
+					return false;
+				}
+			}
+		}
+		jQuery.ajax({
+			url: '/oorder/',
+			cache: false,
+			data: 'ajax=1&' + jQuery( this ).serialize(),
+			dataType: 'json',
+			type: 'post',
+			error:function(){},
+			success:function( d ){
+				if ( 'success' == d.result ) {
+					var callBack = jQuery( '#' + meDiv ).closest( '.online-order-popup' );
+					callBack.find( 'div' ).html( d.message );
+					callBack.find( 'form' ).hide();
+					callBack.find( 'div' ).show();
+					return false;
+				}
+			}
+		});
+		return false;
+	});
+
+	jQuery( 'a[href~="#online-order-popup"],a[href~="#orderonline"]' ).on( 'click', function(){
+		jQuery( '.online-order-popup' ).find( 'form' ).each(function(){jQuery( this )[0].reset()}).show().closest( '.online-order-popup' ).find( 'div' ).html( '' ).hide();
+	} );
+
+	jQuery( '#time_from,#time_till' ).on( 'change', function(){
+		var tf = jQuery( '#time_from' ), tt = jQuery( '#time_till'), time2 = jQuery( '#fast2' );
+		time2.attr( 'checked', true );
+		if ( tf.val() >= tt.val() ) tt.val( parseInt( tf.val() ) + 1 );
+		return true;
+	});
+
+	jQuery.fn.blink = function(){
+		jQuery( this ).stop()
+			.animate({ backgroundColor:'#FF9C9C' }, 250 )
+			.animate({ backgroundColor:'#FFFFFF' }, 250 )
+			.animate({ backgroundColor:'#FF9C9C' }, 250 )
+			.animate({ backgroundColor:'#FFFFFF' }, 250 );
+		return this;
+	};
+
+	jQuery( 'table.pricelist' ).find( '.item' ).on( 'click', function(){
+		var me = jQuery( this ), meRow = me.parents( 'tr' ).find( 'th' ).text(),
+			meColumn = jQuery( 'table.pricelist' ).find( 'thead' ).find( 'tr:last' ).find( 'td' ).eq( me.parent().index() - 1 ).text(),
+			callBack = jQuery( '.online-order-popup:visible' );
+		callBack.find( 'div' ).html( '' );
+		callBack.find( 'form' ).show().get( 0 ).reset();
+		callBack.find( 'div' ).hide();
+		jQuery( 'html,body' ).animate( { scrollTop:callBack.offset().top }, 1000 );
+		if ( '/arenda_samosval/' == window.location.pathname ) {
+			//var orderText = '';
+			//me.closest( 'td' ).siblings().each( function(){ orderText += jQuery( this ).text() + ', ';} );
+			//orderText += parseInt( me.text().replace( ' ', '' ) ) + ' р.';
+			var orderText = 'Аренда ' + me.closest( 'td' ).siblings().first().text();
+			jQuery( '.oocontent:visible' ).val( orderText );
+		} else {
+			jQuery( '.oocontent:visible' ).val( meRow + ', ' + ( ( '' != meColumn ) ? ( meColumn + ', ' ) : '' ) + parseInt( me.html().replace( ' ', '' ).replace( '&nbsp;', '' ) ) + ' р.' );
+		}
+		jQuery( '.ooname:visible' ).focus();
+	} );
+
+	(function(){
+		var goods={}, zones={};
+		function transCalc(){
+			var calcObject = jQuery( '.calculator' );
+			// are we there?
+			if ( 0 == calcObject.length ) return false;
+
+			calcObject.each(function () {
+				var meDiv = jQuery(this).attr('id'), controlSuffix = '';
+				if ('calc' != meDiv) controlSuffix = meDiv.substr(4);
+
+				if (!goods[controlSuffix] || !zones[controlSuffix] || ( 0 == goods[controlSuffix].length ) || ( 0 == zones[controlSuffix].length )) transCalcPreload(controlSuffix);
+
+				var cargoItem = parseInt(jQuery('#calc_goods' + controlSuffix).val()), cargoVolume = parseFloat(jQuery('#calc_volume' + controlSuffix).val().replace(',', '.')),
+					cargoDestination = parseInt(jQuery('#calc_distance' + controlSuffix).val()), calcResult = jQuery('#calc_result' + controlSuffix), deliveryCost, deliveryCostText;
+
+				if (( cargoVolume < 3 ) || ( ( 0 == zones[controlSuffix][cargoDestination][0] ) && ( 0 == zones[controlSuffix][cargoDestination][1] ) )) {
+					calcResult.html('Цена договорная.');
+					return false;
+				}
+
+				if (cargoVolume <= 12) {
+					deliveryCost = cargoVolume * ( goods[controlSuffix][cargoItem][1] + zones[controlSuffix][cargoDestination][0] ) + zones[controlSuffix][cargoDestination][1];
+					if (0 == zones[controlSuffix][cargoDestination][0]) {
+						deliveryCostText = ' ' + cargoVolume + ' * ' + goods[controlSuffix][cargoItem][1] + ' + ' + zones[controlSuffix][cargoDestination][1];
+					} else {
+						deliveryCostText = ' ' + cargoVolume + ' * ( ' + goods[controlSuffix][cargoItem][1] + ' + ' + zones[controlSuffix][cargoDestination][1] + ' ) + ' + zones[controlSuffix][cargoDestination][1];
+					}
+				} else {
+					deliveryCost = cargoVolume * ( goods[controlSuffix][cargoItem][0] + zones[controlSuffix][cargoDestination][0] );
+					if (0 == zones[controlSuffix][cargoDestination][0]) {
+						deliveryCostText = ' ' + cargoVolume + ' * ' + goods[controlSuffix][cargoItem][0];
+					} else {
+						deliveryCostText = ' ' + cargoVolume + ' * ( ' + goods[controlSuffix][cargoItem][0] + ' + ' + zones[controlSuffix][cargoDestination][0] + ' )';
+					}
+				}
+				calcResult.html(deliveryCost + ' руб. <!-- (' + deliveryCostText + ') -->');
+			});
+
+			return false;
+		}
+
+		function transCalcPreload( controlSuffix ){
+			// parse prices select
+			if ( ! goods[controlSuffix] ) goods[controlSuffix] = [];
+			if ( 0 == goods[controlSuffix].length ) {
+				var goodsOptions = jQuery( '#calc_goods' + controlSuffix ).find( 'option' );
+				if ( 0 != goodsOptions.length ) {
+					goodsOptions.each(function(){
+						var newIndex = goods[controlSuffix].length, prices = jQuery( this ).val().split( '|' );
+						goods[controlSuffix][newIndex] = [ parseInt( prices[0] ), parseInt( prices[1] ) ];
+						jQuery( this ).val( newIndex );
+					});
+				}
+			}
+
+			// parse zones select
+			if ( ! zones[controlSuffix] ) zones[controlSuffix] = [];
+			if ( 0 == zones[controlSuffix].length ) {
+				var zonesOptions = jQuery( '#calc_distance' + controlSuffix ).find( 'option' );
+				if ( 0 != zonesOptions.length ) {
+					zonesOptions.each(function(){
+						var newIndex = zones[controlSuffix].length, prices = jQuery( this ).val().split( '|' );
+						zones[controlSuffix][newIndex] = [ parseInt( prices[0] ), parseInt( prices[1] ) ];
+						jQuery( this ).val( newIndex );
+					});
+				}
+			}
+
+			return false;
+		}
+
+		window.transCalc = transCalc;
+		transCalc();
+	})(jQuery);
+
+}) ;
